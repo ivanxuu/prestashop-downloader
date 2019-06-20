@@ -92,6 +92,7 @@ $query    = 'SELECT DISTINCT
     ps_manufacturer.name AS \'brand\',
     ps_product_lang.description AS \'description\',
     ps_product_lang.name AS \'title\',
+    ps_product.active AS \'active\',
     concat("https://www.tiendaprestashopejemplo.es/", ps_category_lang.link_rewrite, "/", ps_product_lang.link_rewrite) AS \'deeplink\',
     concat("https://www.tiendaprestashopejemplo.es/", ps_image.id_image, "-large_default/", ps_product_lang.link_rewrite, ".jpg") AS \'imagelink\'
 FROM
