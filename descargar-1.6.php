@@ -92,6 +92,9 @@ $query    = 'SELECT DISTINCT
     ps_manufacturer.name AS \'brand\',
     ps_product.active AS \'active\',
     ps_product_lang.description AS \'description\',
+
+    ps_product.wholesale_price AS \'wholesale_price\',
+
     ps_product_lang.name AS \'title\',
     ps_product_lang.link_rewrite AS \'productlangrewrite\',
     concat("/", ps_category_lang.link_rewrite, "/", ps_product_lang.link_rewrite) AS \'deeplink\',
@@ -145,6 +148,41 @@ while ($product_row = mysqli_fetch_assoc($dbresult)) {
     $element = $doc->createElement($name, htmlspecialchars($value));
     $product->appendChild($element);
   }
+  // Discounts
+  $discounts_elmt = $doc->createElement('discounts');
+  { // ALL discounts of this product
+    $discounts_query = "SELECT
+        ps_specific_price.id_specific_price,
+        ps_specific_price.id_specific_price_rule,
+        ps_specific_price.id_cart,
+        ps_specific_price.id_shop,
+        ps_specific_price.id_shop_group,
+        ps_specific_price.id_currency,
+        ps_specific_price.id_country,
+        ps_specific_price.id_group,
+        ps_specific_price.id_customer,
+        ps_specific_price.id_product_attribute,
+        ps_specific_price.price,
+        ps_specific_price.from_quantity,
+        ps_specific_price.reduction,
+        ps_specific_price.reduction_tax,
+        ps_specific_price.reduction_type,
+        ps_specific_price.from,
+        ps_specific_price.to
+      FROM ps_specific_price
+      WHERE ps_specific_price.id_product = $product_id";
+    $dbdiscountsresult = mysqli_query($dbconnect, $discounts_query);
+    while ($discount_row = mysqli_fetch_assoc($dbdiscountsresult)) {
+      $discount = $doc->createElement('discount');
+      foreach ($discount_row as $name=>$value )    {
+        $element = $doc->createElement($name, htmlspecialchars($value));
+        $discount->appendChild($element);
+      }
+      $discounts_elmt->appendChild($discount);
+    }
+  }
+  $product->appendChild($discounts_elmt);
+
   // Variants
   $variants = $doc->createElement('variants');
   $variant_query = "SELECT id_product_attribute, reference, price, unit_price_impact, weight FROM ps_product_attribute WHERE ps_product_attribute.id_product = $product_id";
@@ -178,7 +216,31 @@ while ($product_row = mysqli_fetch_assoc($dbresult)) {
         }
       }
       $variant->appendChild($images);
-      //rest of values of product
+      //supplier prices
+      $supplier_prices_elmt = $doc->createElement('supplier_prices');
+      { // ALL supplier prices of this variant
+        $supplier_prices_query = "SELECT
+            ps_product_supplier.product_supplier_price_te,
+            ps_product_supplier.product_supplier_reference,
+            ps_supplier.name,
+            ps_supplier.id_supplier
+          FROM ps_product_supplier
+          INNER JOIN
+              ps_supplier
+              ON ps_product_supplier.id_supplier = ps_supplier.id_supplier
+          WHERE ps_product_supplier.id_product_attribute = $variant_id";
+        $dbsupplypriceresult = mysqli_query($dbconnect, $supplier_prices_query);
+        while ($supplier_price_row = mysqli_fetch_assoc($dbsupplypriceresult)) {
+          $supplier_price = $doc->createElement('supplier_price');
+          foreach ($supplier_price_row as $name=>$value )    {
+            $element = $doc->createElement($name, htmlspecialchars($value));
+            $supplier_price->appendChild($element);
+          }
+          $supplier_prices_elmt->appendChild($supplier_price);
+        }
+      }
+      $variant->appendChild($supplier_prices_elmt);
+      //rest of values
       foreach ( $variant_row as $v_name=>$v_value )    {
         $v_element = $doc->createElement($v_name, htmlspecialchars($v_value));
         $variant->appendChild($v_element);

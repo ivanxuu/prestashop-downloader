@@ -18,6 +18,7 @@ Volcar la base de datos de todos los productos (o uno en particular) a un ficher
  - Lo he probado en la última versión de prestashop 1.7 y 1.6. Hay un fichero PHP por cada versión.
  - **En caso de ser otro prefijo distinto a `ps_` habra que modificarlo!**. Podría pasar que tengan un prefijo diferente a `ps_`. Por defecto es `ps_`, pero si lo cambiaron cuando hicieron la instalación de prestashop, pues habrá que modificar la query.
  - Dentro del script, hay varias lineas comentadas que pueden ser utiles para debuggear algo que no funcione.
+ - La versión para prestashop 1.6 incluye tambien los **descuentos** para cada producto y los **precios de los proveedores** para cada variante. Si necesitas estos datos pero en la versión de prestashop 1.7, tendrías que mezclar el código de `descargar-1.7.php` y `descargar-1.6.php` según tu conveniencia.
 
 ## REPLICAR SISTEMA DE PRESTASHOP
 
